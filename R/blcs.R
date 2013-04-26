@@ -448,6 +448,61 @@ ramBLCS<-function(
 		invisible(return(list(model=model, lavaan=fitModel, ram=ram, info=list(y=y,x=x))))
 	}else{
 	  ram=lavaan2ram(fitModel,ram.out=FALSE)
-		invisible(return(list(model=model, lavaan=fitModel, ram=ram, info=list(y=y,x=x))))
+		invisible(return(list(model=model, lavaan=fitModel, ram=ram, info=list(y=y,x=x,data=data))))
 	}
 }
+
+
+ramVF<-function(ramout, ylim, xlim, ninterval=10, scale=.1, length=.25, scatter=TRUE, n=20, alpha=.95, ...){
+	ind<-which(ramout$lavaan@ParTable$label=="betax")[1]
+	betax<-ramout$lavaan@Fit@est[ind]
+	
+	ind<-which(ramout$lavaan@ParTable$label=="gammax")[1]
+	gammax<-ramout$lavaan@Fit@est[ind]
+	
+	ind<-which(ramout$lavaan@ParTable$label=="betay")[1]
+	betay<-ramout$lavaan@Fit@est[ind]
+	
+	ind<-which(ramout$lavaan@ParTable$label=="gammay")[1]
+	gammay<-ramout$lavaan@Fit@est[ind]
+	
+	ind<-which(ramout$lavaan@ParTable$label=="mxs")[1]
+	mux<-ramout$lavaan@Fit@est[ind]
+	
+	ind<-which(ramout$lavaan@ParTable$label=="mys")[1]
+	muy<-ramout$lavaan@Fit@est[ind]
+	
+	x<-seq(xlim[1],xlim[2], length=ninterval)
+	y<-seq(ylim[1],ylim[2], length=ninterval)
+	xy<-expand.grid(x,y)
+	
+	x<-xy[,1]
+	y<-xy[,2]
+	
+	dx<-mux + betax*x + gammay*y
+	dy<-muy + betay*y + gammax*x
+	
+	x1<-x+scale*dx
+	y1<-y+scale*dy
+	
+	plot(x,y,type='n', ...)
+	arrows(x,y,x1,y1,length=length,...)	
+	
+	if (scatter){
+		alldata<- ramout$info$data #ramout$lavaan@Data@X[[1]]
+		xdata<-c(alldata[1:n, ramout$info$x])
+		ydata<-c(alldata[1:n, ramout$info$y])
+		points(xdata, ydata, col='grey', ...)
+		
+		## add confidence interval
+		##
+		xall <- c(alldata[,ramout$info$x])
+		yall <- c(alldata[,ramout$info$y])
+		
+		require(ellipse)		       
+		       lines(ellipse(cor(xall, yall, use="complete.obs"), level=alpha, scale=c(sd(xall,na.rm=TRUE),sd(yall,na.rm=TRUE)), centre=c(mean(xall,na.rm=TRUE),mean(yall,na.rm=TRUE))), lwd=1.5, col="green")
+	}
+	
+	invisible(cbind(x,y,x1,y1))
+}
+
