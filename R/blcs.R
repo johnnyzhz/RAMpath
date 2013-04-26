@@ -489,7 +489,7 @@ ramVF<-function(ramout, ylim, xlim, ninterval=10, scale=.1, length=.25, scatter=
 	arrows(x,y,x1,y1,length=length,...)	
 	
 	if (scatter){
-		alldata<- ramout$info$data #ramout$lavaan@Data@X[[1]]
+		alldata<- as.matrix(ramout$info$data) #ramout$lavaan@Data@X[[1]]
 		xdata<-c(alldata[1:n, ramout$info$x])
 		ydata<-c(alldata[1:n, ramout$info$y])
 		points(xdata, ydata, col='grey', ...)
