@@ -83,3 +83,19 @@ ramEffectSE<-function(object, effect, path=TRUE){
 	}
 	effect.se
 }
+
+## Refit a model
+ramReFit<-function(object, add, ram.out=FALSE, ...){
+   model<-paste(object$model, "\n", add)
+   data<-object$info$data
+   fitModel<-lavaan(model=model, data=data, ...)
+   summary(fitModel, fit.measures=TRUE)
+	
+   if (ram.out){ 
+		ram=lavaan2ram(fitModel)
+		invisible(return(list(model=model, lavaan=fitModel, ram=ram, info=list(y=y,x=x,data=data))))
+	}else{
+	    ram=lavaan2ram(fitModel,ram.out=FALSE)
+		invisible(return(list(model=model, lavaan=fitModel, ram=ram, info=list(y=y,x=x,data=data))))
+	}
+}
